@@ -6,3 +6,19 @@ build:
   steps:
     - npm-install
     - npm-test
+
+deploy:
+  npm:
+    - script:
+        name: Add npm user
+        code: |
+          touch ~/.npmrc
+          echo //registry.npmjs.org/:_password=$NPM_PASS >> ~/.npmrc
+          echo //registry.npmjs.org/:username=$NPM_USER >> ~/.npmrc
+          echo //registry.npmjs.org/:username=$NPM_EMAIL >> ~/.npmrc
+          exho //registry.npmjs.org/:always-auth=false >> ~/.npmrc
+
+    - script:
+        name: Publish to npm
+        code: |
+          npm publish .
