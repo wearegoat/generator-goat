@@ -1,0 +1,40 @@
+---
+- name: Add Nginx Repository
+  apt_repository: repo='ppa:nginx/stable' state=present
+  register: ppastable
+
+- name: Install Nginx
+  sudo: true
+  apt: pkg=nginx state=installed update_cache=true
+  when: ppastable|success
+  register: nginxinstalled
+  notify:
+    - Start Nginx
+
+- name: Add H5BP Config
+  sudo: true
+  when: nginxinstalled|success
+  copy: src=h5bp dest=/etc/nginx owner=root group=root
+
+- name: Disable Default Site
+  when: nginxinstalled|success
+  sudo: true
+  file: dest=/etc/nginx/sites-enabled/default state=absent
+
+- name: Add SFH Site Config
+  when: nginxinstalled|success
+  register: sfhconfig
+  sudo: true
+  template: src=template.conf.nginx.tpl dest=/etc/nginx/sites-available/{{ domain }}.conf owner=root
+            group=root
+  notify:
+    - Reload Nginx
+
+- name: Enable SFH Site Config
+  when: sfhconfig|success
+  sudo: true
+  file: src=/etc/nginx/sites-available/{{ domain }}.conf dest=/etc/nginx/sites-enabled/{{ domain }}.conf state=link
+  notify:
+    - Reload Nginx
+
+

@@ -1,0 +1,2 @@
+[linode]
+<%= sshHost %>   ansible_ssh_port=<%= sshPort %>     ansible_ssh_user=<%= sshUser %>

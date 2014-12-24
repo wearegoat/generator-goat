@@ -1,0 +1,6 @@
+---
+- hosts: linode
+  # use sudo for all tasks
+  roles:
+    - nginx
+

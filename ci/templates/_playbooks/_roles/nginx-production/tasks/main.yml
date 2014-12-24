@@ -1,0 +1,39 @@
+---
+- name: Add temporary SFH Site Config
+  register: sfhconfig
+  sudo: true
+  template: src=template.conf.nginx.tpl dest=/etc/nginx/sites-available/{{ production_domain }}.conf.temp owner=root
+            group=root
+
+- name: Get temp conf md5
+  sudo: true
+  stat: path=/etc/nginx/sites-available/{{ production_domain }}.conf.temp
+  register: src_conf
+
+- name: Get current conf md5
+  sudo: true
+  stat: path=/etc/nginx/sites-available/{{ production_domain }}.conf
+  register: dest_conf
+
+
+- name: Add SFH Site Config
+  register: sfhconfig_add
+  when: dest_conf.stat.exists != true or dest_conf.stat.checksum != src_conf.stat.checksum
+  sudo: true
+  command: mv /etc/nginx/sites-available/{{ production_domain }}.conf.temp /etc/nginx/sites-available/{{ production_domain }}.conf
+  notify:
+    - Reload Nginx
+
+- name: Check if config changed
+  file: path=/etc/nginx/sites-available/{{ production_domain }}.conf.temp state=absent
+  sudo: true
+  when: dest_conf.stat.exists and dest_conf.stat.checksum == src_conf.stat.checksum
+
+- name: Enable SFH Site Config
+  when: dest_conf.stat.exists != true or dest_conf.stat.checksum != src_conf.stat.checksum
+  sudo: true
+  file: src=/etc/nginx/sites-available/{{ production_domain }}.conf dest=/etc/nginx/sites-enabled/{{ production_domain }}.conf state=link
+  notify:
+    - Reload Nginx
+
+

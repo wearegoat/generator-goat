@@ -1,0 +1,7 @@
+---
+- hosts: linode
+#  remote_user: go
+  # use sudo for all tasks
+  roles:
+    - staging
+    - nginx

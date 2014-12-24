@@ -1,0 +1,209 @@
+box: premist/ubuntu-trusty-nodejs@1.0.0
+
+packages:
+  - firefox
+
+# Build definition
+build:
+  # The steps that will be executed on build
+  steps:
+    - install-packages:
+        packages: curl default-jre git zip wget ruby-full firefox xvfb
+
+    # A step that executes `npm install` command
+    - script:
+        name: Enable virtual display
+        code: |
+          # Start xvfb which gives the context an virtual display
+          # which is required for tests that require an GUI
+          export DISPLAY=:99.0
+          start-stop-daemon --start --quiet --pidfile /tmp/xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset
+          # Give xvfb time to start. 3 seconds is the default for all xvfb-run commands.
+          sleep 3
+
+    - script:
+        name: "project name and project version env"
+        code: |
+          export APP_VERSION=$(usr/local/bin/node -pe 'JSON.parse(process.argv[1]).version' "$(cat package.json)")
+          export RELEASE_NAME=$WERCKER_GIT_REPOSITORY-v$APP_VERSION
+
+    - script:
+        name: "npm and bower"
+        code: |
+          sudo npm install -g karma karma-cli bower gulp protractor
+          sudo npm install
+          bower install
+
+    - script:
+        name: "webdriver start"
+        code: |
+          sudo webdriver-manager update
+
+    - script:
+        name: "build and test"
+        code: |
+          npm run before-push
+
+  after-steps:
+      - wantedly/pretty-slack-notify:
+          webhook_url: $SLACK_WEBHOOK_URL
+
+deploy:
+  #autodeploy to staging
+  steps:
+    - install-packages:
+        packages: software-properties-common python-software-properties curl tar ruby-full firefox xvfb default-jre
+
+    - script:
+        name: Enable virtual display
+        code: |
+          export DISPLAY=:99.0
+          start-stop-daemon --start --quiet --pidfile /tmp/xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset
+          sleep 3
+
+    - script:
+        name: "npm and bower"
+        code: |
+          sudo npm install -g karma karma-cli bower gulp protractor
+          sudo npm install
+          bower --config.analytics=false install
+
+
+    - add-to-known_hosts:
+        hostname: <%= sshHost %>
+        port: <%= sshPort %>
+        local: true
+
+    - script:
+        name: Install ansible
+        code: |
+          sudo apt-get install -y software-properties-common
+          sudo apt-add-repository ppa:ansible/ansible -y
+          sudo apt-get update -qq
+          sudo apt-get install -y ansible
+
+    - script:
+        name: "project name and project version env"
+        code: |
+          ansible --version
+          export APP_VERSION=$(node -pe 'JSON.parse(process.argv[1]).version' "$(cat package.json)")
+          export RELEASE_NAME=$WERCKER_GIT_REPOSITORY-v$APP_VERSION
+
+    - script:
+        name: Copy dist into release folder
+        code: |
+          cp -R dist $RELEASE_NAME
+
+    - script:
+        name: compress dist
+        code: |
+          tar -zcvf $RELEASE_NAME.tar.gz $RELEASE_NAME
+          ls
+          echo $RELEASE_NAME
+
+    - mktemp:
+        envvar: PRIVATEKEY_PATH
+
+    - create-file:
+        name: write key
+        filename: $PRIVATEKEY_PATH
+        content: $WERCKER_PRIVATE
+        overwrite: true
+        hide-from-log: true
+
+    - script:
+        name: ansible stage
+        code: |
+          ansible-playbook playbooks/stage-add.yml -i playbooks/hosts --private-key=$PRIVATEKEY_PATH -vvvv
+
+    - script:
+        name: "webdriver start"
+        code: |
+          sudo webdriver-manager update
+
+    - script:
+        name: test stage
+        code: |
+          export PTOR_BASE_URL=<%= stagingUrl %>
+          npm run test-stage
+
+  after-steps:
+      - wantedly/pretty-slack-notify:
+          webhook_url: $SLACK_WEBHOOK_URL
+
+  #deploy to production
+  production:
+    - install-packages:
+        packages: software-properties-common python-software-properties curl tar ruby-full firefox xvfb default-jre
+
+    - script:
+        name: Enable virtual display
+        code: |
+          export DISPLAY=:99.0
+          start-stop-daemon --start --quiet --pidfile /tmp/xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset
+          sleep 3
+
+    - script:
+        name: "npm and bower"
+        code: |
+          sudo npm install -g karma karma-cli bower gulp protractor
+          sudo npm install
+          bower --config.analytics=false install
+
+
+    - add-to-known_hosts:
+        hostname: <%= sshHost %>
+        port: <%= sshPort %>
+        local: true
+
+    - script:
+        name: Install ansible
+        code: |
+          sudo apt-get install -y software-properties-common
+          sudo apt-add-repository ppa:ansible/ansible -y
+          sudo apt-get update -qq
+          sudo apt-get install -y ansible
+
+    - script:
+        name: "project name and project version env"
+        code: |
+          export APP_VERSION=$(node -pe 'JSON.parse(process.argv[1]).version' "$(cat package.json)")
+          export RELEASE_NAME=$WERCKER_GIT_REPOSITORY-v$APP_VERSION
+
+    - script:
+        name: Copy dist into release folder
+        code: |
+          cp -R dist $RELEASE_NAME
+
+    - script:
+        name: compress dist
+        code: |
+          tar -zcvf $RELEASE_NAME.tar.gz $RELEASE_NAME
+          ls
+          echo $RELEASE_NAME
+
+    - mktemp:
+        envvar: PRIVATEKEY_PATH
+
+    - create-file:
+        name: write key
+        filename: $PRIVATEKEY_PATH
+        content: $WERCKER_PRIVATE
+        overwrite: true
+        hide-from-log: true
+
+    - script:
+        name: ansible stage
+        code: |
+          ansible-playbook playbooks/production.yml -i playbooks/hosts --private-key=$PRIVATEKEY_PATH -vvvv
+
+    - script:
+        name: "webdriver start"
+        code: |
+          sudo webdriver-manager update
+
+    - script:
+        name: test stage
+        code: |
+          export PTOR_BASE_URL=<%= productionUrl %>
+          npm run test-stage

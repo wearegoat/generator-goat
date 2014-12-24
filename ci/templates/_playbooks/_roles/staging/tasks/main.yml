@@ -1,0 +1,66 @@
+---
+- name: Check production version
+  stat: path=/var/www/{{ www_production_symlink }}
+  register: production_stat
+
+- name: Fail if production is staging
+  fail: msg="Production is linked to the same version"
+  when: production_stat.stat.exists and production_stat.stat.lnk_source == "/var/www/{{ lookup( 'env', 'RELEASE_NAME') }}"
+
+- name: Set release name from environment
+  set_fact:
+    release_name: "{{ lookup( 'env', 'RELEASE_NAME') }}"
+
+- name: Check if release exists
+  shell: echo {{ lookup( 'env', 'RELEASE_NAME') }}
+  register: release_exists
+  when: release_name != ""
+
+- name: Check if dist exists
+  stat: path=/var/www/{{ lookup( 'env', 'RELEASE_NAME')}}
+  register: dist_exists
+  when: release_name != ""
+
+- name: Delete previous dist
+  file:
+    path=/var/www/{{ lookup( 'env', 'RELEASE_NAME') }}
+    state=absent
+  sudo: true
+  remote_user: www
+  when: release_name !="" and dist_exists|success
+  register: clean_dist
+
+- name: Unzip artifact
+  sudo: true
+  unarchive:
+    src={{ lookup( 'env', 'WERCKER_SOURCE_DIR') }}/{{lookup( 'env', 'RELEASE_NAME')}}.tar.gz
+    dest=/var/www/
+    owner=www-data
+    group=www-data
+  remote_user: www
+  register: unzip_artifact
+
+- name: Change owner
+  sudo: true
+  file: path=/var/www/{{ lookup( 'env', 'RELEASE_NAME') }} mode=775 state=directory owner=www-data group=www-data recurse=yes
+  when: unzip_artifact|success
+
+- name: Create symlink
+  sudo: true
+  file: src=/var/www/{{ lookup( 'env', 'RELEASE_NAME') }} dest=/var/www/{{ www_symlink }} state=link mode=775 owner=www-data group=www-data
+
+- name: Check if artifact folder exists
+  stat: path=/var/www/{{lookup( 'env', 'RELEASE_NAME')}}/
+  register: artifact_exists
+
+- name: Check if artifact symlink exists
+  stat: path=/var/www/{{ www_symlink }}
+  register: artifact_symlink_exists
+
+- name: Symlink exists
+  debug: msg="Symlink created"
+  when: artifact_symlink_exists.stat.islnk
+
+- name: Artifact exists
+  debug: msg="Artifact created"
+  when: artifact_exists

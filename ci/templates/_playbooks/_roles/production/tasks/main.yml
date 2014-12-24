@@ -1,0 +1,25 @@
+---
+- name: Set release name from environment
+  set_fact:
+    release_name: "{{ lookup( 'env', 'RELEASE_NAME') }}"
+
+- name: Check if release name env variable exists
+  shell: echo {{ lookup( 'env', 'RELEASE_NAME') }}
+  register: release_exists
+  when: release_name != ""
+
+- name: Check if dist folder with release name exists
+  stat: path=/var/www/{{ lookup( 'env', 'RELEASE_NAME')}}
+  register: dist_exists
+  when: release_name != ""
+
+- name: Check if production symlink exist
+  stat: path=/var/www/{{ www_production_symlink }}
+  register: production_symlink_exists
+
+- name: Point production symlink to stage symlink
+  file: src=/var/www/{{ lookup( 'env', 'RELEASE_NAME')}} dest=/var/www/{{ www_production_symlink }} state=link
+  sudo: true
+  when: release_name != ""
+
+

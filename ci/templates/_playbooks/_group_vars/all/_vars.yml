@@ -1,0 +1,5 @@
+---
+domain: <%= stagingUrl %>
+production_domain: <%= productionUrl %>
+www_symlink: <%= stagingSym %>
+www_production_symlink: <%= productionSym %>
