@@ -8,7 +8,7 @@ build:
     - npm-test
 
 deploy:
-  - npm:
+  steps:
     - script:
         name: Add npm user
         code: |
