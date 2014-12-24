@@ -1,4 +1,4 @@
-# generator-goat [![Build Status](https://secure.travis-ci.org/alexeygolev/generator-goat.png?branch=master)](https://travis-ci.org/alexeygolev/generator-goat)
+# generator-goat [![wercker status](https://app.wercker.com/status/9375a006daa091bdd7ee4978f65fafdb/m "wercker status")](https://app.wercker.com/project/bykey/9375a006daa091bdd7ee4978f65fafdb)
 
 > [Yeoman](http://yeoman.io) generator
 
