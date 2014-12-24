@@ -1,0 +1,8 @@
+.idea/
+.npmignore
+.editorconfig
+wercker.yml
+.jshintrc
+.gitattributes
+contributing.md
+test/
