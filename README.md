@@ -1,4 +1,6 @@
-# generator-goat [![wercker status](https://app.wercker.com/status/9375a006daa091bdd7ee4978f65fafdb/m "wercker status")](https://app.wercker.com/project/bykey/9375a006daa091bdd7ee4978f65fafdb)
+# generator-goat [![npm version](https://badge.fury.io/js/generator-goat.svg)](http://badge.fury.io/js/generator-goat)
+
+[![wercker status](https://app.wercker.com/status/9375a006daa091bdd7ee4978f65fafdb/m "wercker status")](https://app.wercker.com/project/bykey/9375a006daa091bdd7ee4978f65fafdb)
 
 > [Yeoman](http://yeoman.io) generator
 
