@@ -26,8 +26,11 @@
     "wercker"
   ],
   "dependencies": {
-    "yeoman-generator": "^0.18.0",
     "chalk": "^0.5.0",
+    "coveralls": "^2.11.2",
+    "istanbul": "^0.3.5",
+    "mocha-lcov-reporter": "0.0.1",
+    "yeoman-generator": "^0.18.0",
     "yosay": "^0.3.0"
   },
   "devDependencies": {
