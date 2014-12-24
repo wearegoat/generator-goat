@@ -16,7 +16,7 @@ deploy:
           echo //registry.npmjs.org/:_password=$NPM_PASS >> ~/.npmrc
           echo //registry.npmjs.org/:username=$NPM_USER >> ~/.npmrc
           echo //registry.npmjs.org/:username=$NPM_EMAIL >> ~/.npmrc
-          exho //registry.npmjs.org/:always-auth=false >> ~/.npmrc
+          echo //registry.npmjs.org/:always-auth=false >> ~/.npmrc
 
     - script:
         name: Publish to npm
