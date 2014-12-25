@@ -2,25 +2,31 @@
 'use strict';
 
 var path = require('path');
-var yeoman = require('yeoman-environment');
-var generators = require('yeoman-generator');
-var TestAdapter = require('../node_modules/yeoman-generator/lib/test/adapter').TestAdapter;
 var assert = require('yeoman-generator').assert;
 var helpers = require('yeoman-generator').test;
 var os = require('os');
 var sinon = require('sinon');
-var tempdir = path.join(os.tmpdir(), './temp-test');
 
 describe('goat:app', function () {
   before(function (done) {
+    this.dummyGen = helpers.createDummyGenerator();
+    this.spy = sinon.spy();
+    this.dummyGen.prototype.initializing = this.spy;
+
+    var deps = [[this.dummyGen, 'goat:ci']];
     helpers.run(path.join(__dirname, '../app'))
       .inDir(path.join(os.tmpdir(), './temp-test'))
       .withOptions({ 'skip-install': true })
+      .withGenerators(deps)
       .withPrompt({
         name: 'new-project',
         description: 'New project description'
       })
       .on('end', done);
+  });
+
+  it('doesn\'t call ci subgenerator', function () {
+    assert(!this.spy.called);
   });
 
   it('creates files', function () {
@@ -57,33 +63,27 @@ describe('goat:app', function () {
 
 });
 
-//describe('goat:app with compose', function () {
-//  before(helpers.setUpTestDirectory(tempdir));
-//  beforeEach(function () {
-//    this.env = yeoman.createEnv([], { 'skip-install': true }, new TestAdapter());
-//
-//    this.spy = sinon.spy();
-//  //
-//    this.SubGen = generators.Base.extend({
-//      exec: this.spy
-//    });
-//    console.log(typeof this.SubGen)
-//    var deps = [path.join(__dirname, '../app')];
-//
-//    this.env.registerStub(this.SubGen, 'goat:ci');
-//    this.gen = helpers.createGenerator('goat:app', deps, [], {
-//      'skip-install': true, env: this.env
-//    });
-//
-//    helpers.mockPrompt(this.gen, {'ci': 'y'});
-//
-//  });
-//
-//  it('creates wercker file', function (done) {
-//    //console.log(this.gen);
-//    var runSpy = sinon.spy(this.gen, 'run');
-//    helpers.run(this.gen)
-//      .on('end', done);
-//  });
-//
-//});
+describe('goat:app composability with ci', function () {
+  before(function (done) {
+    this.dummyGen = helpers.createDummyGenerator();
+    this.spy = sinon.spy();
+    this.dummyGen.prototype.initializing = this.spy;
+
+    var deps = [[this.dummyGen, 'goat:ci']];
+    helpers.run(path.join(__dirname, '../app'))
+      .inDir(path.join(os.tmpdir(), './temp-test'))
+      .withOptions({ 'skip-install': true })
+      .withGenerators(deps)
+      .withPrompt({
+        name: 'new-project',
+        description: 'New project description',
+        ci: true
+      })
+      .on('end', done);
+  });
+
+  it('call ci subgenerator', function () {
+    assert(this.spy.called);
+  });
+
+});

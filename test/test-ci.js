@@ -45,7 +45,7 @@ describe('Goat:ci', function () {
   });
 
   it('creates playbooks files', function () {
-    assert.files([
+    assert.file([
       'playbooks/add_key.yml',
       'playbooks/nginx.yml',
       'playbooks/production.yml',
@@ -54,7 +54,7 @@ describe('Goat:ci', function () {
   });
 
   it('creates group variables file for playbooks', function () {
-    assert.files(['playbooks/group_vars/all/vars.yml']);
+    assert.file(['playbooks/group_vars/all/vars.yml']);
   });
 
   it('appropriately fills the variables file from CLI', function () {
@@ -65,7 +65,7 @@ describe('Goat:ci', function () {
   });
 
   it('copies role files', function () {
-    assert.files([
+    assert.file([
       'playbooks/roles/add_key',
       'playbooks/roles/nginx',
       'playbooks/roles/nginx-production',
