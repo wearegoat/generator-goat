@@ -25,12 +25,7 @@ deploy:
     - script:
         name: Add npm user
         code: |
-          touch ~/.npmrc
-          echo //registry.npmjs.org/:_password=$NPM_PASS >> ~/.npmrc
-          echo //registry.npmjs.org/:username=$NPM_USER >> ~/.npmrc
-          echo //registry.npmjs.org/:username=$NPM_EMAIL >> ~/.npmrc
-          echo //registry.npmjs.org/:always-auth=false >> ~/.npmrc
-          npm adduser
+          sh scripts/npmadduser.sh
 
     - script:
         name: Publish to npm
