@@ -120,6 +120,7 @@ module.exports = yeoman.generators.Base.extend({
 
     composeSubgenerators: function () {
       if(this.ci){
+        console.log('ci', this.ci)
         this.composeWith('goat:ci', {});
       }
     }

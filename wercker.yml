@@ -30,6 +30,7 @@ deploy:
           echo //registry.npmjs.org/:username=$NPM_USER >> ~/.npmrc
           echo //registry.npmjs.org/:username=$NPM_EMAIL >> ~/.npmrc
           echo //registry.npmjs.org/:always-auth=false >> ~/.npmrc
+          npm adduser
 
     - script:
         name: Publish to npm

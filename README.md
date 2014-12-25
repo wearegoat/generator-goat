@@ -23,6 +23,8 @@ yo goat
 Register with [Wercker](http://wercker.com/) and create your app (Wercker's guides are quite clear).
 
 
+### Warning
+This is a work in progress — use as a reference for wercker/ansible workflow
 
 ## License
 

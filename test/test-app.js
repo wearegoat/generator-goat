@@ -2,9 +2,14 @@
 'use strict';
 
 var path = require('path');
+var yeoman = require('yeoman-environment');
+var generators = require('yeoman-generator');
+var TestAdapter = require('../node_modules/yeoman-generator/lib/test/adapter').TestAdapter;
 var assert = require('yeoman-generator').assert;
 var helpers = require('yeoman-generator').test;
 var os = require('os');
+var sinon = require('sinon');
+var tempdir = path.join(os.tmpdir(), './temp-test');
 
 describe('goat:app', function () {
   before(function (done) {
@@ -51,3 +56,34 @@ describe('goat:app', function () {
   });
 
 });
+
+//describe('goat:app with compose', function () {
+//  before(helpers.setUpTestDirectory(tempdir));
+//  beforeEach(function () {
+//    this.env = yeoman.createEnv([], { 'skip-install': true }, new TestAdapter());
+//
+//    this.spy = sinon.spy();
+//  //
+//    this.SubGen = generators.Base.extend({
+//      exec: this.spy
+//    });
+//    console.log(typeof this.SubGen)
+//    var deps = [path.join(__dirname, '../app')];
+//
+//    this.env.registerStub(this.SubGen, 'goat:ci');
+//    this.gen = helpers.createGenerator('goat:app', deps, [], {
+//      'skip-install': true, env: this.env
+//    });
+//
+//    helpers.mockPrompt(this.gen, {'ci': 'y'});
+//
+//  });
+//
+//  it('creates wercker file', function (done) {
+//    //console.log(this.gen);
+//    var runSpy = sinon.spy(this.gen, 'run');
+//    helpers.run(this.gen)
+//      .on('end', done);
+//  });
+//
+//});
