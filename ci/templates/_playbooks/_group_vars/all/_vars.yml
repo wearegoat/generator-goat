@@ -3,3 +3,4 @@ domain: <%= stagingUrl %>
 production_domain: <%= productionUrl %>
 www_symlink: <%= stagingSym %>
 www_production_symlink: <%= productionSym %>
+path_to_wercker_ssh_key:

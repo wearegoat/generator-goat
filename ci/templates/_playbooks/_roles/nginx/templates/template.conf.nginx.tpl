@@ -1,7 +1,7 @@
 server {
     listen 80;
 
-    root /var/www/f4t-stage;
+    root /var/www/{{ www_symlink }};
     index index.html index.htm;
 
     # Will also reply to "localhost" results
