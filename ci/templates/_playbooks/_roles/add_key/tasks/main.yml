@@ -1,5 +1,5 @@
 ---
 - name: Add ssh key to authorized_keys
   authorized_key: user=go
-                  key="{{ lookup('file', '{{ path_to_wercker_ssh_key }}')}}"
+                  key="{{ lookup('file', path_to_wercker_ssh_key) }}"
                   state=present
